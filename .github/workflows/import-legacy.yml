@@ -1,0 +1,28 @@
+name: Import legacy branch
+
+on:
+  workflow_dispatch:
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout destination repository
+        uses: actions/checkout@v4
+        with:
+          repository: tbunitrade/aws-paradisebox-clean
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Add old repository and push master to legacy
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git remote add oldrepo https://github.com/tbunitrade/aws-paradasibix-app.git
+          git fetch oldrepo master
+
+          git checkout -B legacy oldrepo/master
+
+          git push origin legacy --force
