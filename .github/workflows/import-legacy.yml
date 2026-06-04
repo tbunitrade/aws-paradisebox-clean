@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Add old repository and push master to legacy
+      - name: Import old repo master as clean legacy snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -24,8 +24,19 @@ jobs:
           git config user.email "github-actions@github.com"
 
           git remote add oldrepo https://github.com/tbunitrade/aws-paradasibix-app.git
-          git fetch oldrepo master
+          git fetch --depth=1 oldrepo master
 
-          git checkout -B legacy oldrepo/master
+          git checkout --orphan legacy-import
+
+          git rm -rf . || true
+
+          git checkout oldrepo/master -- .
+
+          rm -rf .github/workflows/import-legacy.yml
+
+          git add .
+          git commit -m "Import legacy snapshot from old repository"
+
+          git branch -M legacy
 
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/tbunitrade/aws-paradisebox-clean.git legacy --force
